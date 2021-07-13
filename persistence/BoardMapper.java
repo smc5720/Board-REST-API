@@ -1,9 +1,7 @@
 package com.mincheol.fullstack.persistence;
 
 import com.mincheol.fullstack.domain.BoardVO;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -47,4 +45,27 @@ public interface BoardMapper {
             "SELECT count(*) from board",
             "</script>"})
     Integer countBoard();
+
+    // board를 수정하는 API를 만든다.
+    // update 되는 property의 유무를 판단하기 위해 if 구문으로 null 여부를 체크한다.
+    // update 구문을 만들때 'set key1 = value1, key2 = value2,' 이런 식으로 만들면 맨 뒤 콤마는 없어져야 한다.
+    // 따라서 trim 구문을 사용하여 prefix를 set으로 설정하여 맨 앞에 set을 위치시키고, suffixOverrids=","를 사용하여 맨 뒤 쉼표를 제거한다.
+    @Update({"<script>",
+            "UPDATE board",
+            "<trim prefix='set' suffixOverrides=','>",
+            "<if test='title != null'>title = #{title},</if>",
+            "<if test='content != null'>content = #{content},</if>",
+            "</trim>",
+            "WHERE id = #{id}",
+            "</script>"})
+    int updateBoard(BoardVO boardVO);
+
+    // 삭제 HTTP 메소드는 DELETE를 사용한다.
+    // DELETE도 GET과 마찬가지로 request 시에 body가 없다.
+    // 따라서 Query Parameter나 URI Parameter 방식으로 데이터를 전달해야 한다.
+    @Delete({"<script>",
+            "DELETE FROM board",
+            "WHERE id = #{id}",
+            "</script>"})
+    int deleteBoard(int id);
 }
